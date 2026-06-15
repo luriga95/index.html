@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety Culture Assessment</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  :root {
+    --color-primary: #8B1A1A;
+    --color-primary-light: #f9eaea;
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #666;
+    --color-background: #f5f6f8;
+    --color-background-secondary: #ececec;
+    --color-border: #e0e0e0;
+    --color-border-secondary: #ccc;
+    --border-radius-md: 10px;
+    --border-radius-lg: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--color-background); color: var(--color-text-primary); min-height: 100vh; }
+
+  #app { max-width: 560px; margin: 0 auto; padding: 12px; }
+
+  .lang-bar { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
+  .lang-btn { padding: 8px 16px; border: 1px solid var(--color-border); border-radius: 20px; background: white; cursor: pointer; font-size: 14px; color: var(--color-text-secondary); transition: all .2s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .lang-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .card { background: white; border-radius: var(--border-radius-lg); padding: 20px 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+
+  .section-header { font-size: 16px; font-weight: 600; color: var(--color-primary); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border); }
+
+  .field-label { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 6px; margin-top: 14px; }
+  input[type=text], select { width: 100%; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); font-size: 14px; background: white; color: var(--color-text-primary); outline: none; transition: border .2s; }
+  input[type=text]:focus, select:focus { border-color: var(--color-primary); }
+
+  .nav-btns { display: flex; gap: 10px; margin-top: 20px; justify-content: space-between; }
+  button.primary { padding: 14px 24px; background: var(--color-primary); color: white; border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity .2s; }
+  button.primary:hover { opacity: .88; }
+  button.secondary { padding: 14px 20px; background: transparent; border: 1px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 14px; color: var(--color-text-secondary); cursor: pointer; transition: background .2s; }
+  button.secondary:hover { background: var(--color-background-secondary); }
+
+  .progress-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
+  .progress-bar-outer { height: 5px; background: var(--color-background-secondary); border-radius: 3px; margin-bottom: 16px; }
+  .progress-bar-inner { height: 5px; background: var(--color-primary); border-radius: 3px; transition: width .4s; }
+
+  .scale-wrap { margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--color-border); }
+  .scale-wrap:last-child { border-bottom: none; }
+  .scale-q { font-size: 15px; line-height: 1.6; color: var(--color-text-primary); margin-bottom: 10px; }
+  .scale-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-start; }
+  .scale-btn { width: 52px; height: 52px; border: 1.5px solid var(--color-border); border-radius: 50%; background: white; font-size: 17px; font-weight: 600; cursor: pointer; color: var(--color-text-secondary); transition: all .15s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .scale-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .scale-btn.sel { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+  .scale-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-text-secondary); margin-top: 8px; }
+
+  /* Results */
+  .results-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+  .metric-card { background: var(--color-background); border-radius: var(--border-radius-md); padding: 14px 10px; text-align: center; }
+  .metric-val { font-size: 20px; font-weight: 700; color: var(--color-primary); }
+  .metric-lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 3px; }
+
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .bar-label { font-size: 12px; color: var(--color-text-secondary); min-width: 110px; flex-shrink: 0; text-align: right; }
+  .bar-track { flex: 1; height: 8px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 8px; border-radius: 4px; background: var(--color-primary); transition: width .6s; }
+  .bar-val { font-size: 12px; font-weight: 500; min-width: 28px; color: var(--color-text-primary); }
+
+  /* Radar chart */
+  #radar-container { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--color-border); }
+  .radar-title { font-size: 13px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 12px; text-align: center; }
+  #radar-svg { width: 100%; max-width: 340px; display: block; margin: 0 auto; }
+
+  .export-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: transparent; border: 1px solid var(--color-border-secondary); border-radius: var(--border-radius-md); cursor: pointer; font-size: 14px; color: var(--color-text-secondary); }
+  .export-btn:hover { background: var(--color-background-secondary); }
+
+  .sheet-status { font-size: 12px; padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; }
+  .sheet-status.sending { background: #fff8e1; color: #856404; }
+  .sheet-status.ok      { background: #fdf0f0; color: #8B1A1A; font-weight:500; }
+  .sheet-status.error   { background: #fdecea; color: #c0392b; }
+
+  h1.survey-title { font-size: 20px; font-weight: 600; text-align: center; margin-bottom: .5rem; }
+  p.survey-sub { font-size: 14px; text-align: center; color: var(--color-text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+  .site-badge { display: inline-block; padding: 4px 12px; background: var(--color-background-secondary); border-radius: 20px; font-size: 12px; color: var(--color-text-secondary); margin: .2rem; }
+
+  /* ── Mobile optimizations ── */
+  @media (max-width: 480px) {
+    .results-grid { grid-template-columns: 1fr 1fr; }
+    .metric-val { font-size: 18px; }
+    .bar-label { min-width: 90px; font-size: 11px; }
+    .nav-btns { flex-direction: row; gap: 8px; }
+    button.primary, button.secondary { flex: 1; text-align: center; }
+    #radar-svg { max-width: 300px; }
+    .scale-btn { width: 48px; height: 48px; font-size: 16px; }
+    h1.survey-title { font-size: 18px; }
+    .section-header { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="lang-bar">
+    <button class="lang-btn" onclick="setLang('es')">🇲🇽 ES</button>
+    <button class="lang-btn active" onclick="setLang('en')">🇺🇸 EN</button>
+    <button class="lang-btn" onclick="setLang('ja')">🇯🇵 JP</button>
+  </div>
+
+  <!-- WELCOME -->
+  <div id="screen-welcome" class="screen active">
+    <div class="card" style="text-align:center;padding:2rem">
+      <div style="font-size:44px;margin-bottom:1rem">🛡️</div>
+      <h1 class="survey-title" id="w-title">Safety Culture Assessment</h1>
+      <p class="survey-sub" id="w-sub">Esta encuesta es confidencial y nos ayuda a mejorar nuestra cultura de seguridad. Toma aprox. 5 minutos.</p>
+      <div style="margin-bottom:1.5rem">
+        <span class="site-badge">ViAM Mx</span>
+        <span class="site-badge">ViAM TN</span>
+        <span class="site-badge">Vitechmex</span>
+        <span class="site-badge">Japan Site</span>
+      </div>
+      <button class="primary" onclick="goScreen('screen-info')" id="w-btn">Comenzar encuesta →</button>
+    </div>
+  </div>
+
+  <!-- INFO -->
+  <div id="screen-info" class="screen">
+    <div class="card">
+      <div class="section-header" id="info-header">Información del colaborador</div>
+      <div class="field-label" id="info-emp">Número de empleado</div>
+      <input type="text" id="emp-num" placeholder="Ej. 12345">
+      <div class="field-label" id="info-site">Selecciona tu site</div>
+      <select id="site-sel">
+        <option value="">--</option>
+        <option>ViAM Mx</option>
+        <option>ViAM TN</option>
+        <option>Vitechmex</option>
+        <option>Japan Site</option>
+      </select>
+    </div>
+    <div class="nav-btns">
+      <button class="secondary" onclick="goScreen('screen-welcome')" id="btn-back">← Atrás</button>
+      <button class="primary" onclick="startSurvey()" id="btn-next">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div id="screen-questions" class="screen">
+    <div class="progress-label" id="prog-label">Sección 1 de 5</div>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="prog-bar" style="width:20%"></div></div>
+    <div class="card">
+      <div class="section-header" id="q-section-title">Liderazgo</div>
+      <div id="questions-container"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="secondary" onclick="prevSection()" id="btn-prev">← Atrás</button>
+      <button class="primary" onclick="nextSection()" id="btn-nxt">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="screen">
+    <div class="card">
+      <div class="section-header" id="res-header">Resultados de esta sesión</div>
+      <div class="results-grid" id="metrics-grid"></div>
+      <div id="bars-container"></div>
+      <div id="radar-container">
+        <div class="radar-title" id="radar-title">Resumen por sección</div>
+        <svg id="radar-svg" viewBox="0 0 340 320" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+    <div id="sheet-status" class="sheet-status" style="display:none"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+      <button class="export-btn" onclick="exportCSV()"><i class="ti ti-download"></i> <span id="exp-label">Exportar CSV</span></button>
+      <button class="primary" onclick="resetSurvey()" id="btn-new">Nueva encuesta</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── TRANSLATIONS ───────────────────────────────────────────────────────────
+const T = {
+  es: {
+    wTitle:'Safety Culture Assessment',
+    wSub:'Esta encuesta es confidencial y nos ayuda a mejorar nuestra cultura de seguridad. Toma aprox. 5 minutos.',
+    wBtn:'Comenzar encuesta →',
+    infoHeader:'Información del colaborador', infoEmp:'Número de empleado', infoSite:'Selecciona tu site',
+    back:'← Atrás', next:'Siguiente →', submit:'Ver resultados',
+    progLabel:'Sección {c} de {t}',
+    noSat:'No satisfecho', muySat:'Muy satisfecho',
+    resHeader:'Resultados de esta sesión', radarTitle:'Resumen por sección',
+    expLabel:'Exportar CSV', btnNew:'Nueva encuesta',
+    avgLabel:'Promedio', respLabel:'Respuestas',
+    errEmp:'Ingresa tu número de empleado.', errSite:'Selecciona un site.',
+    errSection:'Responde todas las preguntas de esta sección.',
+    sections:[
+      {title:'Liderazgo', qs:[
+        'Los líderes comunican expectativas claras en lo que respecta a la seguridad y el comportamiento seguro.',
+        'Los líderes adoptan y comunican estrategias y conceptos para mejorar la seguridad y la cultura de seguridad.',
+        'Los líderes actúan como modelos a seguir y promueven la seguridad de forma proactiva en sus rutinas diarias.',
+        'Las responsabilidades, tareas y deberes se delegan al nivel de la fuerza laboral en lo que respecta a la seguridad.',
+        'La comunicación de los líderes en materia de seguridad es clara incluso en situaciones donde existen objetivos contradictorios y/o actos/situaciones inseguras.',
+        'Los líderes motivan, desafían y actúan como entrenadores.'
+      ]},
+      {title:'Valores y Cultura', qs:[
+        'Existe un claro compromiso con la "seguridad ante todo".',
+        'Nos adherimos a la seguridad ante todo / nuestros valores incluso en situaciones críticas y objetivos contradictorios.',
+        'Los valores (responsabilidad, confianza, respeto, integridad) son parte integral de la cultura de seguridad.',
+        'Vivimos en una cultura de confianza en lugar de una cultura de culpabilización.',
+        'Todos conocemos y comprendemos la importancia de nuestra contribución individual a la cultura de seguridad.',
+        'En caso de duda sobre la seguridad de una tarea, esta no se llevará a cabo.'
+      ]},
+      {title:'Integración', qs:[
+        'Los empleados participan activamente en actividades y procesos relacionados con la seguridad (evaluaciones de riesgos, análisis de causas raíz, breves charlas sobre seguridad, recorridos internos de seguridad, etc.).',
+        'Los empleados reciben apoyo de los líderes para lograr los objetivos de seguridad.',
+        'Se reconocen, evalúan y aprueban las sugerencias de seguridad y las buenas prácticas, y se proporciona retroalimentación sobre el estado actual.',
+        'Abordamos activamente las desviaciones de seguridad.',
+        'Los empleados y contratistas externos están integrados en nuestra cultura de seguridad, salud y medio ambiente (HSE).',
+        'Los líderes animan a los empleados a comportarse de forma segura en todo momento.'
+      ]},
+      {title:'Equipo', qs:[
+        'Los equipos aceptan las normas de seguridad fundamentales y las hacen cumplir entre sus compañeros.',
+        'La seguridad forma parte del apoyo mutuo.',
+        'Cada miembro del equipo está motivado para cuidarse mutuamente y está dispuesto a abordar comportamientos críticos o inseguros.',
+        'Los equipos están abordando y discutiendo abiertamente cuestiones/situaciones críticas.',
+        'Los nuevos empleados se integran de forma abierta y proactiva en los equipos.',
+        'Las evaluaciones de riesgos siempre se realizan en equipo.'
+      ]},
+      {title:'Aprendizaje', qs:[
+        'Se anima a los empleados a informar sobre sucesos relevantes (buenos hallazgos, potenciales riesgos elevados, rutinas ocultas...).',
+        'Los equipos pueden analizar incidentes críticos.',
+        'La organización está estructurada de manera que pueda aprender de los incidentes y accidentes.',
+        'La organización transforma el aprendizaje derivado de incidentes y accidentes en programas/actividades proactivas.',
+        'Se implementa una cultura proactiva del fracaso (no se trata de culpar, sino de aprender).',
+        'En nuestra organización existen mecanismos de retroalimentación para comportamientos seguros e inseguros.'
+      ]},
+      {title:'Capacitación', qs:[
+        'Evaluación de riesgos',
+        'Análisis del Titanic (Causa de la Rotura)',
+        'Breves charlas sobre seguridad',
+        'Recorridos internos de seguridad, salud y medio ambiente',
+        'Instrucciones de seguridad',
+        'El éxito de la formación se evalúa periódicamente en función de las necesidades laborales y personales, la eficacia y el seguimiento.',
+        'La capacidad de percepción, evaluación y comunicación del riesgo personal se aborda y se perfecciona periódicamente.',
+        'Los empleados pueden comenzar el nuevo trabajo una vez que obtengan las cualificaciones suficientes y reciban las instrucciones adecuadas.'
+      ]}
+    ]
+  },
+  en: {
+    wTitle:'Safety Culture Assessment',
+    wSub:'This survey is confidential and helps us improve our safety culture. It takes approx. 5 minutes.',
+    wBtn:'Start Survey →',
+    infoHeader:'Employee Information', infoEmp:'Employee Identifier', infoSite:'Select your site',
+    back:'← Back', next:'Next →', submit:'View Results',
+    progLabel:'Section {c} of {t}',
+    noSat:'Not satisfied', muySat:'Very satisfied',
+    resHeader:'Session Results', radarTitle:'Summary by Section',
+    expLabel:'Export CSV', btnNew:'New Survey',
+    avgLabel:'Average', respLabel:'Responses',
+    errEmp:'Please enter your employee number.', errSite:'Please select a site.',
+    errSection:'Please answer all questions in this section.',
+    sections:[
+      {title:'Leadership', qs:[
+        'Leaders clearly communicate expectations regarding safety and safe behavior.',
+        'Leaders adopt and communicate strategies and concepts to improve safety and safety culture.',
+        'Leaders act as role models and proactively promote safety in their daily routines.',
+        'Responsibilities, tasks and duties are delegated to the workforce level regarding safety.',
+        "Leaders' safety communication is clear even in situations with conflicting objectives and/or unsafe acts/situations.",
+        'Leaders motivate, challenge and act as coaches.'
+      ]},
+      {title:'Values', qs:[
+        'There is a clear commitment to "safety first".',
+        'We adhere to safety first / our values even in critical situations and conflicting objectives.',
+        'Values (accountability, trust, respect, integrity) are an integral part of the safety culture.',
+        'We live in a culture of trust rather than a culture of blame.',
+        'Everyone knows and understands the importance of their individual contribution to safety culture.',
+        'If in doubt about the safety of a task, it will not be carried out.'
+      ]},
+      {title:'Integration', qs:[
+        'Employees actively participate in safety-related activities and processes (risk assessments, root cause analyses, safety briefings, internal safety walks, etc.).',
+        'Employees receive support from leaders to achieve safety objectives.',
+        'Safety suggestions and good practices are acknowledged, evaluated and approved, and feedback on current status is provided.',
+        'We actively address safety deviations.',
+        'External employees and contractors are integrated into our HSE culture.',
+        'Leaders encourage employees to behave safely at all times.'
+      ]},
+      {title:'Team', qs:[
+        'Teams accept fundamental safety standards and enforce them among peers.',
+        'Safety is part of mutual support.',
+        'Every team member is motivated to look out for one another and willing to address critical or unsafe behaviors.',
+        'Teams are openly addressing and discussing critical issues/situations.',
+        'New employees are openly and proactively integrated into teams.',
+        'Risk assessments are always carried out as a team.'
+      ]},
+      {title:'Learning', qs:[
+        'Employees are encouraged to report relevant events (good findings, potential high risks, hidden routines...).',
+        'Teams are able to analyze critical incidents.',
+        'The organization is structured to learn from incidents and accidents.',
+        'The organization transforms learning from incidents and accidents into proactive programs/activities.',
+        'A proactive failure culture is implemented (not about blame, but about learning).',
+        'Our organization has feedback mechanisms for safe and unsafe behaviors.'
+      ]},
+      {title:'Training', qs:[
+        'Risk Assessment',
+        'Titanic Analysis (Root Cause Analysis)',
+        'Safety Briefings',
+        'Internal HSE Walks',
+        'Safety Instructions',
+        'Training success is periodically evaluated based on work and personal needs, effectiveness and follow-up.',
+        'The ability to perceive, assess and communicate personal risk is addressed and refined periodically.',
+        'Employees may start new work once they have obtained sufficient qualifications and received proper instructions.'
+      ]}
+    ]
+  },
+  ja: {
+    wTitle:'安全文化評価',
+    wSub:'このアンケートは機密です。安全文化の改善に役立てられます。約5分かかります。',
+    wBtn:'アンケートを開始 →',
+    infoHeader:'従業員情報', infoEmp:'従業員番号', infoSite:'サイトを選択',
+    back:'← 戻る', next:'次へ →', submit:'結果を見る',
+    progLabel:'セクション {c} / {t}',
+    noSat:'不満', muySat:'非常に満足',
+    resHeader:'セッション結果', radarTitle:'セクション別サマリー',
+    expLabel:'CSV出力', btnNew:'新しいアンケート',
+    avgLabel:'平均', respLabel:'回答数',
+    errEmp:'従業員番号を入力してください。', errSite:'サイトを選択してください。',
+    errSection:'このセクションの全質問に回答してください。',
+    sections:[
+      {title:'リーダーシップ', qs:[
+        'リーダーは安全と安全な行動に関して明確な期待を伝えている。',
+        'リーダーは安全と安全文化を改善するための戦略と概念を採用・伝達している。',
+        'リーダーはロールモデルとして行動し、日常業務において積極的に安全を推進している。',
+        '安全に関する責任、タスク、職務は労働力レベルに委任されている。',
+        'リーダーの安全コミュニケーションは、相反する目標や危険な行為・状況においても明確である。',
+        'リーダーは動機付け、挑戦し、コーチとして行動している。'
+      ]},
+      {title:'価値観と文化', qs:[
+        '「安全第一」への明確なコミットメントがある。',
+        '重要な状況や相反する目標においても、安全第一／価値観を守っている。',
+        '価値観（責任、信頼、尊重、誠実さ）は安全文化に不可欠な部分である。',
+        '私たちは非難の文化ではなく、信頼の文化の中で生きている。',
+        '全員が安全文化への個人の貢献の重要性を知り、理解している。',
+        'タスクの安全性に疑いがある場合、そのタスクは実施されない。'
+      ]},
+      {title:'統合', qs:[
+        '従業員は安全関連の活動やプロセス（リスクアセスメント、根本原因分析、安全ブリーフィング、内部安全ウォークなど）に積極的に参加している。',
+        '従業員は安全目標を達成するためにリーダーからサポートを受けている。',
+        '安全提案とベストプラクティスが認識・評価・承認され、現在の状況についてフィードバックが提供されている。',
+        '私たちは積極的に安全からの逸脱に対処している。',
+        '外部従業員と請負業者は私たちのHSE文化に統合されている。',
+        'リーダーは常に安全に行動するよう従業員を励ましている。'
+      ]},
+      {title:'チーム', qs:[
+        'チームは基本的な安全基準を受け入れ、同僚間でそれを施行している。',
+        '安全は相互サポートの一部である。',
+        '全チームメンバーが互いに気にかけ、危険な行動に対処する意欲を持っている。',
+        'チームは重要な問題・状況をオープンに取り上げ、議論している。',
+        '新入社員はチームに開放的かつ積極的に統合されている。',
+        'リスクアセスメントは常にチームで実施されている。'
+      ]},
+      {title:'学習', qs:[
+        '従業員は関連するイベント（良い発見、潜在的な高リスク、隠れたルーティンなど）を報告するよう奨励されている。',
+        'チームは重要なインシデントを分析できる。',
+        '組織はインシデントや事故から学べるよう構成されている。',
+        '組織はインシデントや事故からの学びをプロアクティブなプログラム/活動に変換している。',
+        'プロアクティブな失敗文化が実施されている（非難ではなく学習が目的）。',
+        '組織には安全な行動と危険な行動に関するフィードバックメカニズムがある。'
+      ]},
+      {title:'トレーニング', qs:[
+        'リスクアセスメント',
+        'タイタニック分析（根本原因分析）',
+        '安全ブリーフィング',
+        '内部HSEウォーク',
+        '安全指示',
+        'トレーニングの成果は、業務・個人のニーズ、有効性、フォローアップに基づいて定期的に評価されている。',
+        '個人的なリスクを認識・評価・伝達する能力が定期的に取り上げられ、改善されている。',
+        '従業員は十分な資格を取得し、適切な指示を受けた後に新しい業務を開始できる。'
+      ]}
+    ]
+  }
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let lang = 'en';
+let currentSection = 0;
+let answers = {};
+let empNum = '';
+let site = '';
+let allResponses = [];
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function goScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  applyTranslations();
+}
+
+function applyTranslations() {
+  const t = T[lang];
+  document.getElementById('w-title').textContent = t.wTitle;
+  document.getElementById('w-sub').textContent = t.wSub;
+  document.getElementById('w-btn').textContent = t.wBtn;
+  document.getElementById('info-header').textContent = t.infoHeader;
+  document.getElementById('info-emp').textContent = t.infoEmp;
+  document.getElementById('info-site').textContent = t.infoSite;
+  document.getElementById('btn-back').textContent = t.back;
+  document.getElementById('btn-next').textContent = t.next;
+  document.getElementById('btn-prev').textContent = t.back;
+  document.getElementById('res-header').textContent = t.resHeader;
+  document.getElementById('radar-title').textContent = t.radarTitle;
+  document.getElementById('exp-label').textContent = t.expLabel;
+  document.getElementById('btn-new').textContent = t.btnNew;
+}
+
+function startSurvey() {
+  const t = T[lang];
+  empNum = document.getElementById('emp-num').value.trim();
+  site = document.getElementById('site-sel').value;
+  if (!empNum) { alert(t.errEmp); return; }
+  if (!site) { alert(t.errSite); return; }
+  currentSection = 0;
+  answers = {};
+  renderSection();
+  goScreen('screen-questions');
+}
+
+// ─── QUESTIONS ───────────────────────────────────────────────────────────────
+function renderSection() {
+  const t = T[lang];
+  const sec = t.sections[currentSection];
+  const total = t.sections.length;
+
+  document.getElementById('prog-label').textContent = t.progLabel.replace('{c}', currentSection+1).replace('{t}', total);
+  document.getElementById('prog-bar').style.width = ((currentSection+1)/total*100) + '%';
+  document.getElementById('q-section-title').textContent = sec.title;
+  document.getElementById('btn-nxt').textContent = currentSection === total-1 ? t.submit : t.next;
+
+  const cont = document.getElementById('questions-container');
+  cont.innerHTML = '';
+  sec.qs.forEach((q, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'scale-wrap';
+    const lbl = document.createElement('div');
+    lbl.className = 'scale-q';
+    lbl.textContent = (i+1) + '. ' + q;
+    const btnsRow = document.createElement('div');
+    btnsRow.className = 'scale-btns';
+    for (let v = 0; v <= 4; v++) {
+      const btn = document.createElement('button');
+      btn.className = 'scale-btn' + (answers[currentSection+'_'+i] === v ? ' sel' : '');
+      btn.textContent = v;
+      btn.onclick = ((_v, _i) => () => {
+        answers[currentSection+'_'+_i] = _v;
+        wrap.querySelectorAll('.scale-btn').forEach((b, bi) => b.classList.toggle('sel', bi === _v));
+      })(v, i);
+      btnsRow.appendChild(btn);
+    }
+    const lbRow = document.createElement('div');
+    lbRow.className = 'scale-labels';
+    lbRow.innerHTML = '<span>' + t.noSat + '</span><span>' + t.muySat + '</span>';
+    wrap.appendChild(lbl);
+    wrap.appendChild(btnsRow);
+    wrap.appendChild(lbRow);
+    cont.appendChild(wrap);
+  });
+}
+
+function allAnswered() {
+  const qs = T[lang].sections[currentSection].qs;
+  return qs.every((_, i) => answers[currentSection+'_'+i] !== undefined);
+}
+
+function nextSection() {
+  const t = T[lang];
+  if (!allAnswered()) { alert(t.errSection); return; }
+  if (currentSection < t.sections.length - 1) {
+    currentSection++;
+    renderSection();
+    window.scrollTo(0, 0);
+  } else {
+    saveAndShowResults();
+  }
+}
+
+function prevSection() {
+  if (currentSection > 0) {
+    currentSection--;
+    renderSection();
+    window.scrollTo(0, 0);
+  } else {
+    goScreen('screen-info');
+  }
+}
+
+// ─── GOOGLE SHEETS ───────────────────────────────────────────────────────────
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzCkd9oyNaZErmmhcDxnv1EcEaiyTxkfaH0HRvDncm1MMFbXl5CaFtEjv7Tz94xfZk1/exec';
+
+async function sendToSheet(row) {
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(row)
+    });
+    return true;
+  } catch(e) {
+    console.error('Sheet error:', e);
+    return false;
+  }
+}
+
+// ─── RESULTS ─────────────────────────────────────────────────────────────────
+async function saveAndShowResults() {
+  const t = T[lang];
+  const row = { timestamp: new Date().toISOString(), employee: empNum, site, lang };
+  const secAvgs = [];
+
+  t.sections.forEach((sec, si) => {
+    let sum = 0, count = 0;
+    sec.qs.forEach((q, qi) => {
+      const v = answers[si+'_'+qi];
+      if (v !== undefined) {
+        // Siempre guardamos la pregunta en español para consistencia en el Sheet
+        const esQ = T['es'].sections[si].qs[qi];
+        row['['+T['es'].sections[si].title+'] '+esQ] = v;
+        sum += v; count++;
+      }
+    });
+    secAvgs.push({ title: sec.title, avg: count > 0 ? sum/count : 0, count });
+  });
+  allResponses.push(row);
+
+  // Mostrar pantalla de resultados de inmediato
+  renderResults(secAvgs);
+  goScreen('screen-results');
+
+  // Enviar a Google Sheets en segundo plano
+  setSheetStatus('sending');
+  const ok = await sendToSheet(row);
+  setSheetStatus(ok ? 'ok' : 'error');
+}
+
+function setSheetStatus(status) {
+  const el = document.getElementById('sheet-status');
+  if (!el) return;
+  const msgs = {
+    sending: { es:'Guardando en Google Sheets…', en:'Saving to Google Sheets…', ja:'Google Sheetsに保存中…' },
+    ok:      { es:'✓ Guardado en Google Sheets', en:'✓ Saved to Google Sheets', ja:'✓ Google Sheetsに保存済み' },
+    error:   { es:'⚠ No se pudo guardar. Exporta el CSV como respaldo.', en:'⚠ Could not save. Export CSV as backup.', ja:'⚠ 保存できませんでした。CSVをエクスポートしてください。' }
+  };
+  el.textContent = msgs[status][lang] || msgs[status]['es'];
+  el.className = 'sheet-status ' + status;
+  el.style.display = 'block';
+}
+
+function renderResults(secAvgs) {
+  const t = T[lang];
+  const overall = secAvgs.reduce((s, x) => s + x.avg, 0) / secAvgs.length;
+
+  // Metric cards
+  const grid = document.getElementById('metrics-grid');
+  grid.innerHTML = '';
+  const mkCard = (val, lbl) => {
+    const c = document.createElement('div'); c.className = 'metric-card';
+    c.innerHTML = '<div class="metric-val">'+val+'</div><div class="metric-lbl">'+lbl+'</div>';
+    grid.appendChild(c);
+  };
+  mkCard(overall.toFixed(2)+'/4', t.avgLabel);
+  mkCard(allResponses.length, t.respLabel);
+  mkCard(site, 'Site');
+
+  // Bar chart
+  const bars = document.getElementById('bars-container');
+  bars.innerHTML = '';
+  secAvgs.forEach(s => {
+    const rowEl = document.createElement('div'); rowEl.className = 'bar-row';
+    rowEl.innerHTML = '<div class="bar-label">'+s.title+'</div><div class="bar-track"><div class="bar-fill" style="width:'+Math.round(s.avg/4*100)+'%"></div></div><div class="bar-val">'+s.avg.toFixed(1)+'</div>';
+    bars.appendChild(rowEl);
+  });
+
+  // Radar
+  drawRadar(secAvgs);
+}
+
+// ─── RADAR CHART ─────────────────────────────────────────────────────────────
+function drawRadar(secAvgs) {
+  const svg = document.getElementById('radar-svg');
+  svg.innerHTML = '';
+  const n = secAvgs.length;
+  const cx = 170, cy = 155, R = 105, levels = 4;
+  const angleStep = (2 * Math.PI) / n;
+  const getAngle = i => -Math.PI/2 + i * angleStep;
+
+  // Grid circles + labels
+  for (let l = 1; l <= levels; l++) {
+    const r = (R * l) / levels;
+    const pts = Array.from({length:n}, (_, i) => {
+      const a = getAngle(i);
+      return (cx + r * Math.cos(a)).toFixed(1) + ',' + (cy + r * Math.sin(a)).toFixed(1);
+    }).join(' ');
+    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    poly.setAttribute('points', pts);
+    poly.setAttribute('fill', 'none');
+    poly.setAttribute('stroke', '#e0e0e0');
+    poly.setAttribute('stroke-width', '1');
+    svg.appendChild(poly);
+
+    // Level value label
+    const valLbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    valLbl.setAttribute('x', cx + 4);
+    valLbl.setAttribute('y', cy - r + 3);
+    valLbl.setAttribute('font-size', '9');
+    valLbl.setAttribute('fill', '#aaa');
+    valLbl.textContent = l;
+    svg.appendChild(valLbl);
+  }
+
+  // Axis lines
+  secAvgs.forEach((_, i) => {
+    const a = getAngle(i);
+    const x2 = cx + R * Math.cos(a), y2 = cy + R * Math.sin(a);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+    line.setAttribute('x2', x2.toFixed(1)); line.setAttribute('y2', y2.toFixed(1));
+    line.setAttribute('stroke', '#e0e0e0'); line.setAttribute('stroke-width', '1');
+    svg.appendChild(line);
+  });
+
+  // Data polygon
+  const dataPoints = secAvgs.map((s, i) => {
+    const a = getAngle(i);
+    const r = (s.avg / 4) * R;
+    return [(cx + r * Math.cos(a)).toFixed(1), (cy + r * Math.sin(a)).toFixed(1)];
+  });
+  const dataPoly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  dataPoly.setAttribute('points', dataPoints.map(p=>p.join(',')).join(' '));
+  dataPoly.setAttribute('fill', 'rgba(139,26,26,0.15)');
+  dataPoly.setAttribute('stroke', '#8B1A1A');
+  dataPoly.setAttribute('stroke-width', '2');
+  dataPoly.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(dataPoly);
+
+  // Data dots
+  dataPoints.forEach(([x, y]) => {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x); circle.setAttribute('cy', y);
+    circle.setAttribute('r', '4');
+    circle.setAttribute('fill', '#8B1A1A');
+    svg.appendChild(circle);
+  });
+
+  // Section labels
+  secAvgs.forEach((s, i) => {
+    const a = getAngle(i);
+    const labelR = R + 22;
+    const lx = cx + labelR * Math.cos(a);
+    const ly = cy + labelR * Math.sin(a);
+
+    const words = s.title.split(' ');
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('font-size', '10');
+    text.setAttribute('fill', '#444');
+    text.setAttribute('font-weight', '500');
+
+    // Wrap into 2 lines if needed
+    const line1 = words.slice(0, Math.ceil(words.length/2)).join(' ');
+    const line2 = words.slice(Math.ceil(words.length/2)).join(' ');
+    const dy1 = words.length > 2 ? -6 : 0;
+
+    const tspan1 = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+    tspan1.setAttribute('x', lx.toFixed(1));
+    tspan1.setAttribute('y', ly.toFixed(1));
+    tspan1.setAttribute('dy', dy1);
+    tspan1.textContent = line1;
+    text.appendChild(tspan1);
+
+    if (line2) {
+      const tspan2 = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      tspan2.setAttribute('x', lx.toFixed(1));
+      tspan2.setAttribute('y', ly.toFixed(1));
+      tspan2.setAttribute('dy', dy1 + 13);
+      tspan2.textContent = line2;
+      text.appendChild(tspan2);
+    }
+
+    // Score below label
+    const scoreT = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    scoreT.setAttribute('x', lx.toFixed(1));
+    scoreT.setAttribute('y', (ly + (words.length > 2 ? 22 : 14)).toFixed(1));
+    scoreT.setAttribute('text-anchor', 'middle');
+    scoreT.setAttribute('font-size', '10');
+    scoreT.setAttribute('fill', '#8B1A1A');
+    scoreT.setAttribute('font-weight', '700');
+    scoreT.textContent = s.avg.toFixed(1);
+
+    svg.appendChild(text);
+    svg.appendChild(scoreT);
+  });
+}
+
+// ─── EXPORT CSV ──────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!allResponses.length) return;
+  const keys = Object.keys(allResponses[0]);
+  const csv = [keys.join(','), ...allResponses.map(r =>
+    keys.map(k => {
+      const v = r[k] === undefined ? '' : String(r[k]);
+      return v.includes(',') || v.includes('"') ? '"' + v.replace(/"/g, '""') + '"' : v;
+    }).join(',')
+  )].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
+  a.download = 'safety_assessment_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+}
+
+// ─── RESET ───────────────────────────────────────────────────────────────────
+function resetSurvey() {
+  answers = {}; empNum = ''; site = ''; currentSection = 0;
+  document.getElementById('emp-num').value = '';
+  document.getElementById('site-sel').value = '';
+  goScreen('screen-welcome');
+}
+
+// Init
+applyTranslations();
+</script>
+</body>
+</html>
